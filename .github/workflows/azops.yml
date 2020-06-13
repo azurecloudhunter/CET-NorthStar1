@@ -1,0 +1,50 @@
+name: AzOps
+
+on:
+  repository_dispatch:
+    types:
+      - "activity-logs"
+  pull_request:
+    paths:
+      - "azops/**"
+
+jobs:
+  push:
+    if: ${{ github.event_name == 'pull_request' && github.head_ref != 'system' }}
+    name: Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Actions checkout
+        uses: actions/checkout@v2
+      - name: GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Actions azops
+        uses: ./.github/actions/azops
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          github_comments: ${{ github.event.pull_request._links.comments.href }}
+          github_issue: ${{ github.event.pull_request._links.issue.href }}
+          mode: push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pull:
+    if: ${{ github.event_name == 'repository_dispatch' }}
+    name: Pull
+    runs-on: ubuntu-latest
+    steps:
+      - name: Actions checkout
+        uses: actions/checkout@v2
+      - name: GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Actions azops
+        uses: ./.github/actions/azops
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          mode: pull
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

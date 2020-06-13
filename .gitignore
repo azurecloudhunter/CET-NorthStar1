@@ -1,0 +1,16 @@
+#Private
+**.private**
+
+#DSStore
+.DS_Store
+
+#VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+#Jupyter Notebook checkpoints
+**/.ipynb_checkpoints/*
