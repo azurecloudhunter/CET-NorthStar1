@@ -1,0 +1,65 @@
+name: AzOps
+on: [repository_dispatch]
+jobs:
+  Pull:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      AzOpsState: "azops"
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+      GIT_REDIRECT_STDERR: 2>&1
+    steps:
+      - name: Actions checkout
+        uses: actions/checkout@v2
+      - name: Output context
+        run: |
+          Write-Output $env:GITHUB_CONTEXT
+      - name: Runtime version
+        run: |
+          $PSVersionTable
+      - name: Environment variables
+        run: |
+          Get-ChildItem env:
+      - name: Save modules
+        run: |
+          $moduleVersion = (Find-Module -Name "Az").Version
+          Save-Module -Name Az -LiteralPath "/usr/share/az_$moduleVersion" -RequiredVersion "$moduleVersion" -Force
+      - name: Installed modules
+        run: |
+          $moduleVersion = (Find-Module -Name "Az").Version
+          $env:PSModulePath = ("/usr/share/az_$moduleVersion" + ":") + $env:PSModulePath
+          echo "::set-env name=PSModulePath::$env:PSModulePath"
+      - name: Authenticate session
+        run: |
+          $user = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientId        
+          $secureStringPwd =  ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientSecret | ConvertTo-SecureString -AsPlainText -Force 
+          $tenantId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).tenantId
+          $subscriptionId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).subscriptionId            
+          $credential = New-Object System.Management.Automation.PSCredential -ArgumentList $user, $secureStringPwd        
+          Connect-AzAccount -TenantId $tenantId  -ServicePrincipal -Credential $credential  -SubscriptionId $subscriptionId
+      - name: Install Github CLI
+        shell: bash
+        run: |
+          wget https://github.com/cli/cli/releases/download/v0.6.4/gh_0.6.4_linux_amd64.deb -O /tmp/gh_0.6.4_linux_amd64.deb
+          sudo dpkg -i /tmp/gh_*_linux_amd64.deb
+          mkdir ~/.config/gh
+      - name: CLI Login
+        run: |
+          # CLI only has interactive login, so we manually create the config file with the github token. YAML. Bleh.
+          $y = "hosts:`n  github.com:`n    oauth_token: {0}`n    user: {1}`n" -f $env:GITHUB_TOKEN, $env:GITHUB_ACTOR
+          $y | Out-File -FilePath "~/.config/gh/config.yml"
+      - name: Git Status
+        shell: bash
+        run: |
+          git status
+      - name: Pull requests
+        run: |
+          gh pr list
+      - name: Deployment trigger
+        run: |
+          Import-Module ./src/AzOps.psd1
+          Initialize-AzOpsGlobalVariables
+          Invoke-AzOpsGitPull

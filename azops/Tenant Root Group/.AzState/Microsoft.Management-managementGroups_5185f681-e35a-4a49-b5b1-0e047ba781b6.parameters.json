@@ -1,0 +1,116 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "input": {
+      "value": {
+        "Id": "/providers/Microsoft.Management/managementGroups/5185f681-e35a-4a49-b5b1-0e047ba781b6",
+        "Type": "/providers/Microsoft.Management/managementGroups",
+        "Name": "5185f681-e35a-4a49-b5b1-0e047ba781b6",
+        "TenantId": "5185f681-e35a-4a49-b5b1-0e047ba781b6",
+        "DisplayName": "Tenant Root Group",
+        "UpdatedTime": "0001-01-01T00:00:00Z",
+        "UpdatedBy": null,
+        "ParentId": null,
+        "ParentName": null,
+        "ParentDisplayName": null,
+        "Children": [
+          {
+            "Type": "/providers/Microsoft.Management/managementGroups",
+            "Id": "/providers/Microsoft.Management/managementGroups/ES",
+            "Name": "ES",
+            "DisplayName": "ES",
+            "Children": [
+              {
+                "Type": "/providers/Microsoft.Management/managementGroups",
+                "Id": "/providers/Microsoft.Management/managementGroups/ES-decomissioned",
+                "Name": "ES-decomissioned",
+                "DisplayName": "ES-decomissioned",
+                "Children": null
+              },
+              {
+                "Type": "/providers/Microsoft.Management/managementGroups",
+                "Id": "/providers/Microsoft.Management/managementGroups/ES-platform",
+                "Name": "ES-platform",
+                "DisplayName": "ES-platform",
+                "Children": [
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-management",
+                    "Name": "ES-management",
+                    "DisplayName": "ES-management",
+                    "Children": null
+                  },
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-identity",
+                    "Name": "ES-identity",
+                    "DisplayName": "ES-identity",
+                    "Children": null
+                  },
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-connectivity",
+                    "Name": "ES-connectivity",
+                    "DisplayName": "ES-connectivity",
+                    "Children": null
+                  }
+                ]
+              },
+              {
+                "Type": "/providers/Microsoft.Management/managementGroups",
+                "Id": "/providers/Microsoft.Management/managementGroups/ES-sandboxes",
+                "Name": "ES-sandboxes",
+                "DisplayName": "ES-sandboxes",
+                "Children": null
+              },
+              {
+                "Type": "/providers/Microsoft.Management/managementGroups",
+                "Id": "/providers/Microsoft.Management/managementGroups/ES-landingzones",
+                "Name": "ES-landingzones",
+                "DisplayName": "ES-Landing Zones",
+                "Children": [
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-corp",
+                    "Name": "ES-corp",
+                    "DisplayName": "ES-corp",
+                    "Children": null
+                  },
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-sap",
+                    "Name": "ES-sap",
+                    "DisplayName": "ES-sap",
+                    "Children": null
+                  },
+                  {
+                    "Type": "/providers/Microsoft.Management/managementGroups",
+                    "Id": "/providers/Microsoft.Management/managementGroups/ES-online",
+                    "Name": "ES-online",
+                    "DisplayName": "ES-online",
+                    "Children": null
+                  }
+                ]
+              },
+              {
+                "Type": "/subscriptions",
+                "Id": "/subscriptions/14667799-ca98-4b1c-bc6f-67a75c01b1f3",
+                "Name": "14667799-ca98-4b1c-bc6f-67a75c01b1f3",
+                "DisplayName": "Visual Studio Enterprise Subscription",
+                "Children": null
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "policyDefinitions": [],
+          "policySetDefinitions": [],
+          "policyAssignments": [],
+          "roleDefinitions": null,
+          "roleAssignments": null
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+pr:
+  paths:
+    include:
+      - .azure-pipelines/*
+      - .github/*
+      - azopsreference/*
+      - examples/*
+      - src/*
+      - tests/*
+    exclude:
+      - .vscode/*
+      - docs/*
+
+pool:
+  vmImage: "windows-latest"
+
+steps:
+  - task: PowerShell@2
+    displayName: "Get runtime version"
+    inputs:
+      targetType: inline
+      script: "$PSVersionTable"
+      pwsh: true
+
+  - task: PowerShell@2
+    displayName: "Uninstall modules"
+    inputs:
+      targetType: inline
+      script: |
+        Remove-Item "C:\Modules\az*" -Recurse -Force -Confirm:$false -Verbose
+        $module = "C:\Program Files\WindowsPowerShell\Modules\Pester"
+        takeown /F $module /A /R
+        icacls $module /reset
+        icacls $module /grant "*S-1-5-32-544:F" /inheritance:d /T
+        Remove-Item -Path $module -Recurse -Force -Confirm:$false -Verbose
+      pwsh: true
+
+  - task: PowerShell@2
+    displayName: "Install modules"
+    inputs:
+      targetType: inline
+      script: |
+        $modules = "Az.Resources", "Az.Accounts"
+        Install-Module -Name $modules -Force -Verbose
+      pwsh: true
+
+  - task: PowerShell@2
+    displayName: "Get installed versions"
+    inputs:
+      targetType: inline
+      script: |
+        Get-Module -ListAvailable
+      pwsh: true
+
+  - task: PowerShell@2
+    displayName: "Connect Azure"
+    inputs:
+      targetType: inline
+      script: |
+        $clientId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientId
+        $secureStringPwd =  ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientSecret | ConvertTo-SecureString -AsPlainText -Force
+        $tenantId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).tenantId
+        $subscriptionId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).subscriptionId
+        $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $clientId, $secureStringPwd
+        Connect-AzAccount -TenantId $tenantId  -ServicePrincipal -Credential $cred  -subscriptionId $subscriptionId -Verbose
+      pwsh: true
+    env:
+      AZURE_CREDENTIALS: $(AZURE_CREDENTIALS)
+
+  - task: Pester@9
+    displayName: "AzOps.Module.Manifest.Tests"
+    inputs:    
+      scriptFolder: '$(System.DefaultWorkingDirectory)\tests\AzOps.Module.Manifest.Tests.ps1'
+      resultsFile: '$(System.DefaultWorkingDirectory)\Test-Pester-AzOps.Module.Manifest.Tests.XML'
+      pwsh: true
+
+  - task: Pester@9
+    displayName: "AzOps.IAB.Tests"
+    inputs:    
+      scriptFolder: '$(System.DefaultWorkingDirectory)\tests\AzOps.IAB.Tests.ps1'
+      resultsFile: '$(System.DefaultWorkingDirectory)\Test-Pester-AzOps.IAB.Tests.XML'
+      pwsh: true
+
+  - task: Pester@9
+    displayName: "AzOps.Scope"
+    inputs:    
+      scriptFolder: '$(System.DefaultWorkingDirectory)\tests\AzOps.Scope.Tests.ps1'
+      resultsFile: '$(System.DefaultWorkingDirectory)\Test-Pester-AzOps.Scope.XML'
+      pwsh: true
+
+  - task:  PublishTestResults@2
+    displayName: 'Publish-AzOps.Tests.Results'
+    inputs:
+      testResultsFormat: "JUnit"
+      testResultsFiles: '**/Test-*.xml'
+      pwsh: true

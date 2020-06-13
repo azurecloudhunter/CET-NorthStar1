@@ -1,0 +1,84 @@
+name: AzOps
+on:
+  pull_request:
+    paths:
+      - "azops/**"
+jobs:
+  Push:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      AzOpsState: "azops"
+      AzOpsEnrollmentAccountPrincipalName: ${{ secrets.AZURE_ENROLLMENT_ACCOUNT_NAME }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      GIT_REDIRECT_STDERR: 2>&1
+      GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+    steps:
+      - name: Actions checkout
+        uses: actions/checkout@v2
+      - name: Runtime version
+        run: |
+          $PSVersionTable
+      - name: Environment variables
+        run: |
+          Get-ChildItem env:
+      - name: Save modules
+        run: |
+          New-Item -Path "/usr/share" -Name "az_4.1.0" -ItemType Directory
+          Save-Module -Name "Az.Accounts" -LiteralPath "/usr/share/az_4.1.0" -RequiredVersion "1.8.0" -Force
+          Save-Module -Name "Az.Resources" -LiteralPath "/usr/share/az_4.1.0" -RequiredVersion "2.0.1" -Force
+      - name: Update modules
+        run: |
+          $env:PSModulePath = ("/usr/share/az_4.1.0" + ":") + $env:PSModulePath
+          echo "::set-env name=PSModulePath::$env:PSModulePath"
+      - name: Authenticate session
+        run: |
+          $clientId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientId
+          $clientSecret =  ($env:AZURE_CREDENTIALS | ConvertFrom-Json).clientSecret | ConvertTo-SecureString -AsPlainText -Force
+          $tenantId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).tenantId
+          $subscriptionId = ($env:AZURE_CREDENTIALS | ConvertFrom-Json).subscriptionId
+          $credential = New-Object System.Management.Automation.PSCredential -ArgumentList $clientId, $clientSecret
+          Connect-AzAccount -TenantId $tenantId  -ServicePrincipal -Credential $credential  -SubscriptionId $subscriptionId
+      - name: Configure git
+        run: |
+          git config --global user.email $env:GIT_USER_EMAIL
+          git config --global user.name $env:GIT_USER_NAME
+      - name: Invoke refresh
+        id: refresh
+        run: |
+          Import-Module ./src/AzOps.psd1
+          . ./src/private/Invoke-AzOpsGitRefresh.ps1
+          $changes = Invoke-AzOpsGitRefresh -Mode Pre -BaseBranch $env:GITHUB_BASE_REF -HeadBranch $env:GITHUB_HEAD_REF -InvalidateCache -SkipResourceGroup
+          if ($null -ne $changes) {
+            Write-Host "Evaluation: true"
+            Write-Host "-----"
+            echo "::set-output name=state::true"
+            echo "::set-env name=changes::$changes"
+          } else {
+            Write-Host "Evaluation: false"
+            echo "::set-output name=state::false"
+          }
+      - name: Write comment
+        run: |
+          . ./src/private/New-AzOpsComment.ps1
+          New-AzOpsComment -Changes ${env:changes}
+          Write-Error -Message "Terminating workflow."
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ steps.refresh.outputs.state == 'true' }}
+      - name: Invoke push
+        run: |
+          Import-Module ./src/AzOps.psd1
+          Initialize-AzOpsGlobalVariables
+          Invoke-AzOpsGitPush
+        if: ${{ steps.refresh.outputs.state == 'false' }}
+      - name: Invoke refresh
+        run: |
+          Import-Module ./src/AzOps.psd1
+          . ./src/private/Invoke-AzOpsGitRefresh
+          Invoke-AzOpsGitRefresh -Mode Post -BaseBranch $env:GITHUB_BASE_REF -HeadBranch $env:GITHUB_HEAD_REF -InvalidateCache -SkipResourceGroup
+        if: ${{ steps.refresh.outputs.state == 'false' }}

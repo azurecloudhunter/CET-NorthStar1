@@ -1,0 +1,22 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "input": {
+      "value": {
+        "Type": "/subscriptions",
+        "Id": "/subscriptions/14667799-ca98-4b1c-bc6f-67a75c01b1f3",
+        "Name": "14667799-ca98-4b1c-bc6f-67a75c01b1f3",
+        "DisplayName": "Visual Studio Enterprise Subscription",
+        "Children": null,
+        "properties": {
+          "policyDefinitions": [],
+          "policySetDefinitions": [],
+          "policyAssignments": [],
+          "roleDefinitions": null,
+          "roleAssignments": null
+        }
+      }
+    }
+  }
+}
