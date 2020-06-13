@@ -1,0 +1,40 @@
+# See for instructions on this file https://help.github.com/articles/about-codeowners/
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @global-owner1 and @global-owner2 will be requested for
+# review when someone opens a pull request.
+* @cet-northstar-vteam
+
+.github/CODEOWNERS @uday31in
+src/AzOps.psd1 @ljtill
+src/AzOps.psm1 @uday31in
+src/AzOpsStateConfig.json @daltondhcp
+src/private/Compare-AzOpsState.ps1 @daltondhcp
+src/private/ConvertTo-AzOpsObject.ps1 @daltondhcp
+src/private/ConvertTo-AzOpsState.ps1 @daltondhcp
+src/private/ConvertTo-AzOpsTemplateParameterObject.ps1 @daltondhcp
+src/private/Get-AzOpsGitBranch.ps1 @ljtill
+src/private/Get-AzOpsGitStatus.ps1 @ljtill
+src/private/Get-AzOpsPolicyAssignmentAtScope.ps1 @uday31in
+src/private/Get-AzOpsPolicyDefinitionAtScope.ps1 @uday31in
+src/private/Get-AzOpsPolicySetDefinitionAtScope.ps1 @uday31in
+src/private/Get-AzOpsResourceDefinitionAtScope.ps1 @uday31in
+src/private/Get-AzOpsRoleAssignmentAtScope.ps1 @uday31in
+src/private/Get-AzOpsRoleDefinitionAtScope.ps1 @uday31in
+src/private/Invoke-AzOpsGitRefresh.ps1 @ljtill
+src/private/New-AzOpsComment.ps1 @ljtill
+src/private/New-AzOpsPullRequest.ps1 @ljtill
+src/private/New-AzOpsStateDeployment.ps1 @ljtill
+src/private/Register-AzOpsProviderFeature.ps1 @uday31in
+src/private/Register-AzOpsResourceProvider.ps1 @uday31in
+src/private/Remove-AzOpsManagementGroup.ps1 @uday31in
+src/private/Save-AzOpsManagementGroupChildren.ps1 @uday31in
+src/private/Test-AzOpsDuplicateSubMgmtGroup.ps1 @daltondhcp
+src/private/Test-AzOpsVariables.ps1 @daltondhcp
+src/providerfeatures.json @uday31in
+src/public/Initialize-AzOpsGlobalVariables.ps1 @daltondhcp
+src/public/Initialize-AzOpsRepository.ps1 @daltondhcp
+src/public/Invoke-AzOpsGitPull.ps1 @ljtill
+src/public/Invoke-AzOpsGitPush.ps1 @ljtill
+src/resourceproviders.json @uday31in
